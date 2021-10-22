@@ -3,6 +3,10 @@ const forecastCardsContainer = $("#forecast-cards-container");
 
 const apiKey = "393609ac7b2e5f25ccdd00e626ee13dd";
 
+const renderFormaDate = function (date) {
+  return moment.unix(date).format("DD/MM/YYYY");
+};
+
 const getCurrentData = function (nameOfCiy, forecastData) {
   return {
     name: nameOfCiy,
@@ -19,7 +23,7 @@ const getForecastData = function (forecastData) {
   const callback = function (each) {
     console.log(each);
     return {
-      date: "(3/30/2021)",
+      date: renderFormaDate(each.dt),
       temperature: each.temp.max,
       wind: each.wind_speed,
       humidity: each.humidity,
