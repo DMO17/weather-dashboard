@@ -50,6 +50,25 @@ const mockData = {
 const currentWeatherCardContainer = $("#current-day-container");
 const forecastCardsContainer = $("#forecast-cards-container");
 
+const apiKey = "393609ac7b2e5f25ccdd00e626ee13dd";
+
+const getWeatherDataFromApi = async function (cityName) {
+  // construct url to get data
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}`;
+
+  // fetch the data from the api using the constructed url
+  const response = await fetch(url);
+  const data = await response.json();
+  const lat = data.coord.lat;
+  const lon = data.coord.lon;
+  const nameOfCiy = data.name;
+
+  // construct forecast url
+  const forecastUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`;
+
+  console.log(forecastUrl);
+};
+
 const renderCurrentWeatherCard = function (currentData) {
   //construct the weather cards dynamically
   const weatherCardHTMLCode = `<div class="card-title h1"> ${currentData.name} ${currentData.date}
@@ -85,13 +104,14 @@ const renderForecastWeatherCard = function (forecastData) {
   forecastData.map(constructAndAppendForecastCards);
 };
 
-const renderWeatherCards = function (weatherData) {
+const renderAllWeatherCards = function (weatherData) {
   renderCurrentWeatherCard(weatherData.current);
 
   renderForecastWeatherCard(weatherData.forecast);
 };
 const onReady = function () {
-  renderWeatherCards(mockData);
+  renderAllWeatherCards(mockData);
+  getWeatherDataFromApi("Birmingham");
 };
 
 $(document).ready(onReady);
