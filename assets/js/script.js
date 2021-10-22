@@ -1,5 +1,6 @@
 const currentWeatherCardContainer = $("#current-day-container");
 const forecastCardsContainer = $("#forecast-cards-container");
+const searchForm = $("#search-form");
 
 const apiKey = "393609ac7b2e5f25ccdd00e626ee13dd";
 
@@ -14,8 +15,8 @@ const getCurrentData = function (nameOfCiy, forecastData) {
     wind: forecastData.current.wind_speed,
     humidity: forecastData.current.humidity,
     uvi: forecastData.current.uvi,
-    date: "(3/30/2021)",
-    iconCode: "04n",
+    date: renderFormaDate(forecastData.current.dt),
+    iconCode: forecastData.current.weather[0].icon,
   };
 };
 
@@ -27,11 +28,11 @@ const getForecastData = function (forecastData) {
       temperature: each.temp.max,
       wind: each.wind_speed,
       humidity: each.humidity,
-      iconCode: "04n",
+      iconCode: each.weather[0].icon,
     };
   };
 
-  return forecastData.daily.map(callback);
+  return forecastData.daily.slice(1, 6).map(callback);
 };
 
 const getWeatherDataFromApi = async function (cityName) {
@@ -103,12 +104,23 @@ const renderAllWeatherCards = function (weatherData) {
   renderForecastWeatherCard(weatherData.forecast);
 };
 
-const onReady = async function () {
-  // get data from api
-  const weatherData = await getWeatherDataFromApi("leeds");
+const searchCityName = async function (event) {
+  event.preventDefault();
 
-  // render the weather cards
-  renderAllWeatherCards(weatherData);
+  const userInputValue = $("#city-name");
+  const cityName = userInputValue.val();
+
+  if (cityName) {
+    // get data from api
+    const weatherData = await getWeatherDataFromApi(cityName);
+
+    // render the weather cards
+    currentWeatherCardContainer.empty();
+    forecastCardsContainer.empty();
+    renderAllWeatherCards(weatherData);
+
+    //save city to local storage
+  }
 };
 
-$(document).ready(onReady);
+searchForm.on("submit", searchCityName);

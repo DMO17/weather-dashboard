@@ -52,7 +52,7 @@
               <div class="h1">Search for a city:</div>
               <form class="form" id="search-form">
                 <input
-                  id="city-input"
+                  id="city-name"
                   class="form-control col-12 p-2 my-2"
                   type="search"
                   placeholder="Search"
@@ -78,7 +78,10 @@
           </div>
           <div class="col-12 col-md-9 border p-2 mb-3">
             <!-- RIGHT HAND SIDE WITH WEATHER CARDS AND FORECAST CONTAINER-->
-            <div class="d-flex flex-column flex-wrap">
+            <div
+              class="d-flex flex-column flex-wrap"
+              id="weather-info-container"
+            >
               <!--Current city Weather Card -->
               <div
                 class="border card-body bg-white mb-3"
