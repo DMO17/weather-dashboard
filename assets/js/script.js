@@ -1,11 +1,12 @@
 const currentWeatherCardContainer = $("#current-day-container");
 const forecastCardsContainer = $("#forecast-cards-container");
 const searchForm = $("#search-form");
+const cityHistoryContainer = $("#city-history");
 
 const apiKey = "393609ac7b2e5f25ccdd00e626ee13dd";
 
-const renderFormaDate = function (date) {
-  return moment.unix(date).format("DD/MM/YYYY");
+const renderFormaDate = function (date, format = "DD/MM/YYYY") {
+  return moment.unix(date).format(format);
 };
 
 const getCurrentData = function (nameOfCiy, forecastData) {
@@ -15,14 +16,13 @@ const getCurrentData = function (nameOfCiy, forecastData) {
     wind: forecastData.current.wind_speed,
     humidity: forecastData.current.humidity,
     uvi: forecastData.current.uvi,
-    date: renderFormaDate(forecastData.current.dt),
+    date: renderFormaDate(forecastData.current.dt, "ddd DD/MM/YYYY HH:mm"),
     iconCode: forecastData.current.weather[0].icon,
   };
 };
 
 const getForecastData = function (forecastData) {
   const callback = function (each) {
-    console.log(each);
     return {
       date: renderFormaDate(each.dt),
       temperature: each.temp.max,
@@ -81,6 +81,8 @@ const renderCurrentWeatherCard = function (currentData) {
 
 const renderForecastWeatherCard = function (forecastData) {
   const constructAndAppendForecastCards = function (each) {
+    const forecastCardHeader = `<div class="h2">5-day-Forecast</div>`;
+
     const forecastCardsHTML = `
     <ul class="list-group m-3" id="forecast-cards-container">
     <li class="list-group-item disabled bg-primary text-white">
@@ -98,10 +100,65 @@ const renderForecastWeatherCard = function (forecastData) {
   forecastData.map(constructAndAppendForecastCards);
 };
 
+const getFromLocalStorage = function () {
+  const cities = JSON.parse(localStorage.getItem("cities-names")) ?? [];
+};
+
+const setLocalStorage = function (cityName) {
+  //save city to local storage
+  const cities = JSON.parse(localStorage.getItem("cities-names")) ?? [];
+
+  if (!cities.includes(cityName)) {
+    // get city name from local storeage
+    cities.push(cityName);
+
+    // add city name to history list
+    localStorage.setItem("cities-names", JSON.stringify(cities));
+    // set cities in LS
+  }
+};
+
+const renderRecentSearchedCities = function () {
+  const cities = JSON.parse(localStorage.getItem("cities-names")) ?? [];
+
+  cityHistoryContainer.empty();
+
+  const constructHistoryCityList = function (each) {
+    const historyTableHtml = `<li data-city=${each} class="list-group-item">${each}</li>
+    `;
+
+    cityHistoryContainer.append(historyTableHtml);
+  };
+
+  cities.forEach(constructHistoryCityList);
+
+  const handleClick = function (event) {
+    const target = $(event.target);
+
+    if (target.is("li")) {
+      const cityName = target.data("city");
+
+      renderWeatherInfo(cityName);
+    }
+  };
+
+  cityHistoryContainer.on("click", handleClick);
+};
+
 const renderAllWeatherCards = function (weatherData) {
   renderCurrentWeatherCard(weatherData.current);
 
   renderForecastWeatherCard(weatherData.forecast);
+};
+
+const renderWeatherInfo = async function (cityName) {
+  // get data from api
+  const weatherData = await getWeatherDataFromApi(cityName);
+
+  // render the weather cards
+  currentWeatherCardContainer.empty();
+  forecastCardsContainer.empty();
+  renderAllWeatherCards(weatherData);
 };
 
 const searchCityName = async function (event) {
@@ -111,16 +168,27 @@ const searchCityName = async function (event) {
   const cityName = userInputValue.val();
 
   if (cityName) {
-    // get data from api
-    const weatherData = await getWeatherDataFromApi(cityName);
+    renderWeatherInfo(cityName);
 
-    // render the weather cards
-    currentWeatherCardContainer.empty();
-    forecastCardsContainer.empty();
-    renderAllWeatherCards(weatherData);
+    // set and add to local storage
+    setLocalStorage(cityName);
 
-    //save city to local storage
+    // add the city names into the history table
+    renderRecentSearchedCities();
   }
 };
 
 searchForm.on("submit", searchCityName);
+
+const onLoad = function () {
+  renderRecentSearchedCities();
+
+  const cities = JSON.parse(localStorage.getItem("cities-names")) ?? [];
+
+  if (cities.length) {
+    const lastCitySearched = cities.pop();
+
+    renderWeatherInfo(lastCitySearched);
+  }
+};
+$(document).ready(onLoad);
