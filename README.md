@@ -6,7 +6,7 @@ Created a weather dashboard application dynamically using HTML , CSS Javascript 
 
 ## Completed :
 
-To see the full URL deployed web-application project <a href=https://dmo17.github.io/coding-quiz-challenge//>click here </a>
+To see the full URL deployed web-application project <a href=https://dmo17.github.io/weather-dashboard/>click here </a>
 
 ## Preview: Image Of HTML , CSS and JavaScript Code:
 
